@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+langchain
+langchain-community
+langchain-openai
+jinja2
+scikit-learn
+numpy
+python-dotenv

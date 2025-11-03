@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>RAG PDF Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>Assistente RAG</h1>
+
+  <section class="card">
+    <h2>1. Enviar PDF</h2>
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="file" name="file" id="file" required>
+      <button type="submit">Upload</button>
+    </form>
+    <p><small>Depois do upload, use o nome exato do arquivo abaixo.</small></p>
+  </section>
+
+  <section class="card">
+    <h2>2. Perguntar ao PDF</h2>
+    <form id="ask-form">
+      <input type="text" name="filename" placeholder="nome do arquivo (ex: curriculo.pdf)" required>
+      <input type="text" name="session_id" placeholder="id da sessão (ex: nicolas)" required>
+      <input type="text" name="question" placeholder="Digite sua pergunta..." required>
+      <button type="submit">Perguntar</button>
+    </form>
+    <button id="clear-session-btn">Limpar conversa</button>
+  </section>
+
+  <section class="card">
+    <h2>Resposta</h2>
+    <pre id="response"></pre>
+  </section>
+
+  <script>
+    // upload
+    document.getElementById("upload-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const res = await fetch("/upload", { method: "POST", body: data });
+      const result = await res.json();
+      alert(result.message);
+    };
+
+    // perguntar
+    document.getElementById("ask-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const res = await fetch("/ask", { method: "POST", body: data });
+      const result = await res.json();
+      document.getElementById("response").innerText =
+        (result.answer || result.error || "[sem resposta]");
+    };
+
+    // limpar sessão
+    document.getElementById("clear-session-btn").onclick = async () => {
+      const form = document.getElementById("ask-form");
+      const session_id = form.querySelector('input[name="session_id"]').value;
+      const data = new FormData();
+      data.append("session_id", session_id);
+
+      const res = await fetch("/clear_session", {
+        method: "POST",
+        body: data
+      });
+      const result = await res.json();
+      alert(result.message);
+      document.getElementById("response").innerText = "";
+    };
+  </script>
+</body>
+</html>
